@@ -1,0 +1,112 @@
+{
+  "name": "ZM Mega Mall - Damaged Stock Alert",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "inventory-damaged-alert",
+        "responseMode": "onReceived",
+        "options": {}
+      },
+      "id": "4c2a8f11-3b70-4b5f-a001-200000000001",
+      "name": "Damaged Stock Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [260, 300],
+      "webhookId": "inventory-damaged-alert"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.event_type }}",
+              "rightValue": "damaged_stock",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "4c2a8f11-3b70-4b5f-a001-200000000002",
+      "name": "Is Damaged Stock Event",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [520, 300]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "4c2a8f11-3b70-4b5f-a001-200000000003",
+              "name": "subject",
+              "type": "string",
+              "value": "={{ 'Damaged Stock Alert - ' + ($json.product_name || 'Unknown product') }}"
+            },
+            {
+              "id": "4c2a8f11-3b70-4b5f-a001-200000000004",
+              "name": "message",
+              "type": "string",
+              "value": "={{ 'Product name: ' + ($json.product_name || '') + '\\nQuantity damaged: ' + ($json.quantity ?? '') + '\\nReason: ' + ($json.reason || '') + '\\nUser: ' + ($json.user_id || '') + '\\nTimestamp: ' + ($json.occurred_at || $now) }}"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "4c2a8f11-3b70-4b5f-a001-200000000005",
+      "name": "Format Damaged Stock Email",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [780, 180]
+    },
+    {
+      "parameters": {
+        "resource": "message",
+        "operation": "send",
+        "sendTo": "sanakhan031788@gmail.com",
+        "subject": "={{ $json.subject }}",
+        "message": "={{ $json.message }}",
+        "options": {}
+      },
+      "id": "4c2a8f11-3b70-4b5f-a001-200000000006",
+      "name": "Gmail - Damaged Stock Alert",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [1040, 180]
+    }
+  ],
+  "connections": {
+    "Damaged Stock Webhook": {
+      "main": [[{"node": "Is Damaged Stock Event", "type": "main", "index": 0}]]
+    },
+    "Is Damaged Stock Event": {
+      "main": [
+        [{"node": "Format Damaged Stock Email", "type": "main", "index": 0}],
+        []
+      ]
+    },
+    "Format Damaged Stock Email": {
+      "main": [[{"node": "Gmail - Damaged Stock Alert", "type": "main", "index": 0}]]
+    }
+  },
+  "active": false,
+  "settings": {},
+  "versionId": "4c2a8f11-3b70-4b5f-a001-200000000007",
+  "meta": {
+    "templateCredsSetupCompleted": false
+  },
+  "pinData": {},
+  "tags": []
+}

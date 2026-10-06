@@ -1,0 +1,257 @@
+{
+  "name": "ZM Mega Mall - AI Stock Request Notifications",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "inventory-ai-request",
+        "responseMode": "onReceived",
+        "options": {}
+      },
+      "id": "6e3b9a22-4c81-4c6f-a001-300000000001",
+      "name": "AI Stock Request Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [260, 360],
+      "webhookId": "inventory-ai-request"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.event_type }}",
+                    "rightValue": "ai_stock_request_created",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "created"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.event_type }}",
+                    "rightValue": "ai_stock_request_confirmed",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "confirmed"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.event_type }}",
+                    "rightValue": "ai_stock_request_cancelled",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "cancelled"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "6e3b9a22-4c81-4c6f-a001-300000000002",
+      "name": "Route AI Request Event",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [520, 360]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "6e3b9a22-4c81-4c6f-a001-300000000003",
+              "name": "subject",
+              "type": "string",
+              "value": "={{ 'New Inventory Change Request - ' + ($json.product || $json.product_name || 'Unknown product') }}"
+            },
+            {
+              "id": "6e3b9a22-4c81-4c6f-a001-300000000004",
+              "name": "message",
+              "type": "string",
+              "value": "={{ 'Request ID: ' + ($json.request_id || '') + '\\nProduct: ' + ($json.product || $json.product_name || '') + '\\nAction: ' + ($json.action || '') + '\\nQuantity: ' + ($json.quantity ?? '') + '\\nSupplier: ' + ($json.supplier || '') + '\\nRequested by: ' + ($json.requested_by || '') + '\\nStatus: ' + ($json.status || '') }}"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "6e3b9a22-4c81-4c6f-a001-300000000005",
+      "name": "Format Created Request Email",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [780, 120]
+    },
+    {
+      "parameters": {
+        "resource": "message",
+        "operation": "send",
+        "sendTo": "sanakhan031788@gmail.com",
+        "subject": "={{ $json.subject }}",
+        "message": "={{ $json.message }}",
+        "options": {}
+      },
+      "id": "6e3b9a22-4c81-4c6f-a001-300000000006",
+      "name": "Gmail - Request Created",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [1040, 120]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "6e3b9a22-4c81-4c6f-a001-300000000007",
+              "name": "subject",
+              "type": "string",
+              "value": "={{ 'Inventory Change Confirmed - ' + ($json.product || $json.product_name || 'Unknown product') }}"
+            },
+            {
+              "id": "6e3b9a22-4c81-4c6f-a001-300000000008",
+              "name": "message",
+              "type": "string",
+              "value": "={{ 'Request ID: ' + ($json.request_id || '') + '\\nProduct: ' + ($json.product || $json.product_name || '') + '\\nAction: ' + ($json.action || '') + '\\nQuantity: ' + ($json.quantity ?? '') + '\\nSupplier: ' + ($json.supplier || '') + '\\nRequested by: ' + ($json.requested_by || '') + '\\nStatus: ' + ($json.status || '') }}"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "6e3b9a22-4c81-4c6f-a001-300000000009",
+      "name": "Format Confirmed Request Email",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [780, 360]
+    },
+    {
+      "parameters": {
+        "resource": "message",
+        "operation": "send",
+        "sendTo": "sanakhan031788@gmail.com",
+        "subject": "={{ $json.subject }}",
+        "message": "={{ $json.message }}",
+        "options": {}
+      },
+      "id": "6e3b9a22-4c81-4c6f-a001-300000000010",
+      "name": "Gmail - Request Confirmed",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [1040, 360]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "6e3b9a22-4c81-4c6f-a001-300000000011",
+              "name": "subject",
+              "type": "string",
+              "value": "={{ 'Inventory Change Cancelled - ' + ($json.product || $json.product_name || 'Unknown product') }}"
+            },
+            {
+              "id": "6e3b9a22-4c81-4c6f-a001-300000000012",
+              "name": "message",
+              "type": "string",
+              "value": "={{ 'Request ID: ' + ($json.request_id || '') + '\\nProduct: ' + ($json.product || $json.product_name || '') + '\\nAction: ' + ($json.action || '') + '\\nQuantity: ' + ($json.quantity ?? '') + '\\nSupplier: ' + ($json.supplier || '') + '\\nRequested by: ' + ($json.requested_by || '') + '\\nStatus: ' + ($json.status || '') }}"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "6e3b9a22-4c81-4c6f-a001-300000000013",
+      "name": "Format Cancelled Request Email",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [780, 600]
+    },
+    {
+      "parameters": {
+        "resource": "message",
+        "operation": "send",
+        "sendTo": "sanakhan031788@gmail.com",
+        "subject": "={{ $json.subject }}",
+        "message": "={{ $json.message }}",
+        "options": {}
+      },
+      "id": "6e3b9a22-4c81-4c6f-a001-300000000014",
+      "name": "Gmail - Request Cancelled",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [1040, 600]
+    }
+  ],
+  "connections": {
+    "AI Stock Request Webhook": {
+      "main": [[{"node": "Route AI Request Event", "type": "main", "index": 0}]]
+    },
+    "Route AI Request Event": {
+      "main": [
+        [{"node": "Format Created Request Email", "type": "main", "index": 0}],
+        [{"node": "Format Confirmed Request Email", "type": "main", "index": 0}],
+        [{"node": "Format Cancelled Request Email", "type": "main", "index": 0}]
+      ]
+    },
+    "Format Created Request Email": {
+      "main": [[{"node": "Gmail - Request Created", "type": "main", "index": 0}]]
+    },
+    "Format Confirmed Request Email": {
+      "main": [[{"node": "Gmail - Request Confirmed", "type": "main", "index": 0}]]
+    },
+    "Format Cancelled Request Email": {
+      "main": [[{"node": "Gmail - Request Cancelled", "type": "main", "index": 0}]]
+    }
+  },
+  "active": false,
+  "settings": {},
+  "versionId": "6e3b9a22-4c81-4c6f-a001-300000000015",
+  "meta": {
+    "templateCredsSetupCompleted": false
+  },
+  "pinData": {},
+  "tags": []
+}

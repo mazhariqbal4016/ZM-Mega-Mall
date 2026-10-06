@@ -1,0 +1,105 @@
+{
+  "name": "ZM Mega Mall - Daily Manager Inventory Summary",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 20 * * *"
+            }
+          ]
+        }
+      },
+      "id": "8a4d0b33-5d92-4d7f-a001-400000000001",
+      "name": "Every Day at 8 PM",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [260, 300]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "http://127.0.0.1:8000/manager/automation/daily-summary",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {}
+      },
+      "id": "8a4d0b33-5d92-4d7f-a001-400000000002",
+      "name": "Get Manager Summary",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [520, 300],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "REPLACE_AFTER_IMPORT",
+          "name": "REPLACE_AFTER_IMPORT"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "8a4d0b33-5d92-4d7f-a001-400000000003",
+              "name": "subject",
+              "type": "string",
+              "value": "Daily Inventory Summary"
+            },
+            {
+              "id": "8a4d0b33-5d92-4d7f-a001-400000000004",
+              "name": "message",
+              "type": "string",
+              "value": "={{ 'Total active products: ' + ($json.total_active_products ?? '') + '\\nTotal stock quantity: ' + ($json.total_stock_quantity ?? '') + '\\nLow stock count: ' + ($json.low_stock_products_count ?? '') + '\\nOut-of-stock count: ' + ($json.out_of_stock_products_count ?? '') + '\\nDamaged quantity: ' + ($json.total_damaged_quantity_today ?? '') + '\\nInventory cost value: ' + ($json.total_inventory_cost_value ?? $json.inventory_cost_value ?? '') + '\\nEstimated profit: ' + ($json.estimated_profit ?? '') + '\\n\\nRecent movements:\\n' + JSON.stringify($json.recent_movements || [], null, 2) }}"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "8a4d0b33-5d92-4d7f-a001-400000000005",
+      "name": "Format Daily Summary Email",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [780, 300]
+    },
+    {
+      "parameters": {
+        "resource": "message",
+        "operation": "send",
+        "sendTo": "sanakhan031788@gmail.com",
+        "subject": "={{ $json.subject }}",
+        "message": "={{ $json.message }}",
+        "options": {}
+      },
+      "id": "8a4d0b33-5d92-4d7f-a001-400000000006",
+      "name": "Gmail - Daily Manager Summary",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [1040, 300]
+    }
+  ],
+  "connections": {
+    "Every Day at 8 PM": {
+      "main": [[{"node": "Get Manager Summary", "type": "main", "index": 0}]]
+    },
+    "Get Manager Summary": {
+      "main": [[{"node": "Format Daily Summary Email", "type": "main", "index": 0}]]
+    },
+    "Format Daily Summary Email": {
+      "main": [[{"node": "Gmail - Daily Manager Summary", "type": "main", "index": 0}]]
+    }
+  },
+  "active": false,
+  "settings": {
+    "timezone": "Asia/Karachi"
+  },
+  "versionId": "8a4d0b33-5d92-4d7f-a001-400000000007",
+  "meta": {
+    "templateCredsSetupCompleted": false
+  },
+  "pinData": {},
+  "tags": []
+}

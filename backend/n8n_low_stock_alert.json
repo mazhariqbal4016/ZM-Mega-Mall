@@ -1,0 +1,188 @@
+{
+  "name": "ZM Mega Mall - Low Stock and Out of Stock Alerts",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "inventory-stock-alert",
+        "responseMode": "onReceived",
+        "options": {}
+      },
+      "id": "2f1c7d9e-8c2f-4a4d-a001-100000000001",
+      "name": "Inventory Stock Alert Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [260, 300],
+      "webhookId": "inventory-stock-alert"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.event_type }}",
+                    "rightValue": "low_stock",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "low_stock"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.event_type }}",
+                    "rightValue": "out_of_stock",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "out_of_stock"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "2f1c7d9e-8c2f-4a4d-a001-100000000002",
+      "name": "Route Stock Alert",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [520, 300]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "2f1c7d9e-8c2f-4a4d-a001-100000000003",
+              "name": "subject",
+              "type": "string",
+              "value": "={{ 'Low Stock Alert - ' + ($json.product_name || 'Unknown product') }}"
+            },
+            {
+              "id": "2f1c7d9e-8c2f-4a4d-a001-100000000004",
+              "name": "message",
+              "type": "string",
+              "value": "={{ 'Product name: ' + ($json.product_name || '') + '\\nSKU: ' + ($json.sku || '') + '\\nCurrent quantity: ' + ($json.new_quantity ?? $json.quantity ?? '') + '\\nMinimum stock: ' + ($json.minimum_stock ?? '') + '\\nLocation: ' + ($json.location || '') + '\\nEvent type: ' + ($json.event_type || '') }}"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "2f1c7d9e-8c2f-4a4d-a001-100000000005",
+      "name": "Format Low Stock Email",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [780, 180]
+    },
+    {
+      "parameters": {
+        "resource": "message",
+        "operation": "send",
+        "sendTo": "sanakhan031788@gmail.com",
+        "subject": "={{ $json.subject }}",
+        "message": "={{ $json.message }}",
+        "options": {}
+      },
+      "id": "2f1c7d9e-8c2f-4a4d-a001-100000000006",
+      "name": "Gmail - Low Stock Alert",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [1040, 180]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "2f1c7d9e-8c2f-4a4d-a001-100000000007",
+              "name": "subject",
+              "type": "string",
+              "value": "={{ 'Out of Stock - ' + ($json.product_name || 'Unknown product') }}"
+            },
+            {
+              "id": "2f1c7d9e-8c2f-4a4d-a001-100000000008",
+              "name": "message",
+              "type": "string",
+              "value": "={{ 'Product name: ' + ($json.product_name || '') + '\\nSKU: ' + ($json.sku || '') + '\\nCurrent quantity: 0\\nMinimum stock: ' + ($json.minimum_stock ?? '') + '\\nLocation: ' + ($json.location || '') + '\\nEvent type: ' + ($json.event_type || '') }}"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "2f1c7d9e-8c2f-4a4d-a001-100000000009",
+      "name": "Format Out of Stock Email",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [780, 420]
+    },
+    {
+      "parameters": {
+        "resource": "message",
+        "operation": "send",
+        "sendTo": "sanakhan031788@gmail.com",
+        "subject": "={{ $json.subject }}",
+        "message": "={{ $json.message }}",
+        "options": {}
+      },
+      "id": "2f1c7d9e-8c2f-4a4d-a001-100000000010",
+      "name": "Gmail - Out of Stock Alert",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [1040, 420]
+    }
+  ],
+  "connections": {
+    "Inventory Stock Alert Webhook": {
+      "main": [[{"node": "Route Stock Alert", "type": "main", "index": 0}]]
+    },
+    "Route Stock Alert": {
+      "main": [
+        [{"node": "Format Low Stock Email", "type": "main", "index": 0}],
+        [{"node": "Format Out of Stock Email", "type": "main", "index": 0}]
+      ]
+    },
+    "Format Low Stock Email": {
+      "main": [[{"node": "Gmail - Low Stock Alert", "type": "main", "index": 0}]]
+    },
+    "Format Out of Stock Email": {
+      "main": [[{"node": "Gmail - Out of Stock Alert", "type": "main", "index": 0}]]
+    }
+  },
+  "active": false,
+  "settings": {},
+  "versionId": "2f1c7d9e-8c2f-4a4d-a001-100000000011",
+  "meta": {
+    "templateCredsSetupCompleted": false
+  },
+  "pinData": {},
+  "tags": []
+}

@@ -1,0 +1,32 @@
+# Secrets and local environment files
+.env
+.env.*
+!.env.example
+**/.env
+**/.env.*
+!**/.env.example
+
+# Python
+venv/
+.venv/
+**/venv/
+**/.venv/
+__pycache__/
+**/__pycache__/
+*.pyc
+*.pyo
+
+# JavaScript build and dependency output
+node_modules/
+**/node_modules/
+dist/
+**/dist/
+build/
+**/build/
+
+# Local tooling and OS files
+.vscode/
+.idea/
+.DS_Store
+*.log
+*.local
