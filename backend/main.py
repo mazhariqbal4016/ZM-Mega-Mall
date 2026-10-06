@@ -56,6 +56,39 @@ bearer_scheme = HTTPBearer(auto_error=False)
 # Pakistan uses UTC+05:00 year-round; this avoids a tzdata runtime dependency.
 LOCAL_TIMEZONE = timezone(timedelta(hours=5))
 
+MALL_OPERATIONAL_AREAS = [
+    {
+        "name": "Parking Area",
+        "type": "operational",
+        "inventory_enabled": False,
+        "description": "Mall operations area; payment and product stock stay separate.",
+    },
+    {
+        "name": "Billing Counters",
+        "type": "operational",
+        "inventory_enabled": False,
+        "description": "Operational area; POS/payment workflows are not part of inventory.",
+    },
+    {
+        "name": "Store Room / Warehouse",
+        "type": "inventory_location",
+        "inventory_enabled": True,
+        "description": "Products can use Main Store, Store Room, Warehouse, or Billing Floor as locations.",
+    },
+    {
+        "name": "Food Court / Restaurants",
+        "type": "inventory_department",
+        "inventory_enabled": True,
+        "description": "Food-related stock is supported through the Food Court / Restaurants category.",
+    },
+    {
+        "name": "Pharmacy",
+        "type": "inventory_department",
+        "inventory_enabled": True,
+        "description": "Optional non-prescription inventory category; no prescription workflow is enabled.",
+    },
+]
+
 
 class SignupRequest(BaseModel):
     full_name: str
@@ -1106,6 +1139,13 @@ def manager_recent_movements(
             status_code=503,
             detail=f"Could not load recent movements: {_supabase_error_message(exc)}",
         ) from exc
+
+
+@app.get("/manager/operational-areas")
+def manager_operational_areas(user: dict[str, Any] = Depends(require_manager)):
+    """Return mall operational areas without mixing them into product stock tables."""
+    del user
+    return MALL_OPERATIONAL_AREAS
 
 
 def _report_stock_product(product: dict[str, Any]) -> dict[str, Any]:

@@ -52,7 +52,9 @@ secret out of Git and frontend variables.
 1. Create a Supabase project.
 2. Copy `.env.example` to `.env` and add your Supabase URL and keys.
 3. Run `supabase_schema.sql` in the Supabase SQL Editor.
-4. Start the API and open `/db-health` to verify the connection.
+4. Run `mall_departments_seed.sql` to add the mall departments and safe sample
+   products without changing existing quantities.
+5. Start the API and open `/db-health` to verify the connection.
 
 The backend prefers `SUPABASE_SERVICE_ROLE_KEY` for server-side database access and falls back to `SUPABASE_ANON_KEY` when the service-role key is not set. Never expose the service-role key to a frontend.
 
@@ -71,6 +73,21 @@ Authentication endpoints:
 Set `SUPABASE_SERVICE_ROLE_KEY` in `.env` for secure signup, profile lookups, and protected backend queries. This key must remain backend-only.
 
 To promote a user, run the command in `promote_manager.sql` from the Supabase SQL Editor. Public signup never accepts the manager role.
+
+### Mall departments and operational areas
+
+The department seed supports Grocery, Clothes/Clothing, Electronics, Household
+Items/Household, Cosmetics, Toys & Stationery, Food Court / Restaurants, and
+Pharmacy (non-prescription inventory only). Product `location` supports places
+such as Main Store, Store Room, Warehouse, Billing Floor, Food Court, and
+Pharmacy Counter. Parking Area and Billing Counters are represented as
+operational areas rather than product categories. Managers can view them at
+`GET /manager/operational-areas`.
+
+The requested manager and staff emails are prepared in
+`setup_test_accounts.sql`. It only updates an existing Supabase Auth-linked
+profile and never creates or exposes a password. If either email is not already
+registered, create it through the normal signup flow first, then run the SQL.
 
 ## Inventory operations
 

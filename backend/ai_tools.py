@@ -14,7 +14,21 @@ _STOP_WORDS = {
     "product", "products", "show", "stock", "tell", "the", "what", "which",
     "with", "item", "items", "today", "there", "this", "that", "week",
     "cost", "price", "value", "profit", "history", "movement", "report",
-    "units", "does", "have", "happened", "to", "inventory",
+    "units", "does", "have", "happened", "to", "inventory", "kitna", "kitni",
+    "kitne", "mein", "main", "hai", "hain", "kya", "dikhao", "dikhaye",
+    "batao", "bataiye", "ka", "ki", "ke", "ko", "se", "par", "pe", "mujhe",
+    "mera", "hamara", "aur", "konsi", "kaun", "wala", "wale",
+}
+
+_CATEGORY_ALIASES = {
+    "grocery": {"grocery"},
+    "clothing": {"clothing", "clothes", "apparel"},
+    "electronics": {"electronics", "electronic"},
+    "household": {"household", "household items", "home"},
+    "cosmetics": {"cosmetics", "cosmetic", "makeup", "beauty"},
+    "toys & stationery": {"toys", "toy", "stationery", "school stationery", "office stationery"},
+    "food court / restaurants": {"food court", "restaurant", "restaurants", "food"},
+    "pharmacy": {"pharmacy", "medical"},
 }
 
 
@@ -93,7 +107,12 @@ def _matches_query(product: dict[str, Any], query: str) -> bool:
     category = _as_dict(product.get("categories"))
     searchable = " ".join(
         str(value or "")
-        for value in (product.get("name"), product.get("sku"), category.get("name"))
+        for value in (
+            product.get("name"),
+            product.get("sku"),
+            category.get("name"),
+            product.get("location"),
+        )
     ).lower()
     query_lower = query.lower().strip()
     if query_lower in searchable:
@@ -121,8 +140,10 @@ def get_product_stock(query: str, role: str) -> list[dict[str, Any]]:
 def _category_matches(product: dict[str, Any], category_query: str | None) -> bool:
     if not category_query:
         return True
-    category = _as_dict(product.get("categories")).get("name")
-    return category_query.lower() in str(category or "").lower()
+    category = str(_as_dict(product.get("categories")).get("name") or "").lower()
+    query = category_query.lower().strip()
+    aliases = _CATEGORY_ALIASES.get(query, {query})
+    return any(alias in category or category in alias for alias in aliases)
 
 
 def get_low_stock(role: str, category_query: str | None = None) -> list[dict[str, Any]]:

@@ -37,6 +37,8 @@ pnpm build
 
 - Login with the existing FastAPI authentication
 - Role-aware dashboard and product catalog
+- Department and location filters for Grocery, Clothes, Electronics, Household,
+  Cosmetics, Toys & Stationery, Food Court, and Pharmacy inventory
 - Stock operations and stock history
 - Staff-safe and manager-only reports
 - Read-only AI assistant
