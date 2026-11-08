@@ -840,6 +840,20 @@ def stock_in(
     return _apply_stock_change("stock_in", payload, user)
 
 
+@app.post("/stock/quick-restock")
+def quick_restock(
+    payload: StockChangeRequest,
+    user: dict[str, Any] = Depends(get_current_user),
+):
+    """Receive one of the safe quick-restock quantities exposed by the UI."""
+    if payload.quantity not in {10, 25, 50, 100}:
+        raise HTTPException(
+            status_code=422,
+            detail="Quick restock quantity must be 10, 25, 50, or 100 units",
+        )
+    return _apply_stock_change("stock_in", payload, user)
+
+
 @app.post("/stock/out")
 def stock_out(
     payload: StockChangeRequest,
