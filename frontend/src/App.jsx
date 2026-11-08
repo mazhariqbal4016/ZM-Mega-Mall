@@ -18,6 +18,7 @@ function clearSession() { sessionStorage.removeItem('zm-mega-mall-session') }
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || ''
 const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || ''
+const PASSWORD_RESET_REDIRECT_URL = 'https://mazhariqbal4016.github.io/ZM-Mega-Mall/'
 
 function recoveryParams() {
   const params = new URLSearchParams(window.location.hash.replace(/^#/, ''))
@@ -32,7 +33,7 @@ async function requestPasswordReset(email) {
   const response = await fetch(`${SUPABASE_URL}/auth/v1/recover`, {
     method: 'POST',
     headers: { apikey: SUPABASE_ANON_KEY, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email: email.trim().toLowerCase(), redirect_to: window.location.href.split('#')[0] }),
+    body: JSON.stringify({ email: email.trim().toLowerCase(), redirect_to: PASSWORD_RESET_REDIRECT_URL }),
   })
   if (!response.ok) throw new Error('Could not send the reset email. Please check the email address and try again.')
 }
