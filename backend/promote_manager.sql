@@ -2,7 +2,7 @@
 -- Public signup can create staff users only.
 
 update public.profiles
-set role = 'manager'
-where email = 'manager@example.com';
+set role = 'manager', is_active = true
+where lower(email) = lower('mazhariqbal4016@gmail.com');
 
--- Replace manager@example.com with the verified staff user's email.
+-- Run this after the admin has completed Supabase Auth signup.
