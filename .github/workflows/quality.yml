@@ -6,6 +6,11 @@ on:
   pull_request:
     branches: [main]
 
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
 jobs:
   frontend:
     runs-on: ubuntu-latest
@@ -22,6 +27,24 @@ jobs:
       - run: npm install
       - run: npm run build
       - run: npm run lint
+
+      - name: Upload GitHub Pages artifact
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: frontend/dist
+
+  deploy-frontend:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: frontend
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
 
   backend:
     runs-on: ubuntu-latest
