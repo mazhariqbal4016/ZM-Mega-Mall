@@ -7,9 +7,7 @@ on:
     branches: [main]
 
 permissions:
-  contents: read
-  pages: write
-  id-token: write
+  contents: write
 
 jobs:
   frontend:
@@ -28,23 +26,13 @@ jobs:
       - run: npm run build
       - run: npm run lint
 
-      - name: Upload GitHub Pages artifact
+      - name: Publish frontend to GitHub Pages branch
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-        uses: actions/upload-pages-artifact@v3
+        uses: peaceiris/actions-gh-pages@v4
         with:
-          path: frontend/dist
-
-  deploy-frontend:
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    needs: frontend
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_branch: gh-pages
+          publish_dir: frontend/dist
 
   backend:
     runs-on: ubuntu-latest
