@@ -44,6 +44,7 @@ textarea { resize: vertical; }
 .secondary-button:hover { border-color: #a9c6cb; box-shadow: 0 4px 12px rgba(16, 35, 56, .06); }
 .full-button { width: 100%; margin-top: 4px; padding: 14px 16px; }
 .login-note { margin-top: 18px; text-align: center; color: #8b97a7; font-size: 12px; }
+.forgot-link, .auth-back { display: block; margin: 14px auto 0; }
 .login-tabs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin: 24px 0 20px; padding: 5px; border: 1px solid var(--line); border-radius: 10px; background: #f6f9fb; }
 .login-tabs button { padding: 9px 8px; border: 0; border-radius: 7px; color: var(--muted); background: transparent; font-size: 12px; font-weight: 750; }
 .login-tabs button.active { color: var(--teal); background: #fff; box-shadow: 0 2px 8px rgb(25 57 77 / 8%); }
